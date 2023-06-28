@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:checkin_application/models/employee.dart';
 import 'package:checkin_application/myconfig.dart';
+import 'package:checkin_application/screens/welcomescreen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
   final Employee employee;
@@ -63,6 +65,7 @@ class _MainScreenState extends State<MainScreen> {
                     radius: 40.0,
                     backgroundImage: AssetImage('assets/images/profile.png'),
                   ),
+                  SizedBox(height: 15.0),
                   Text(
                     widget.employee.name.toString(),
                     style: TextStyle(
@@ -97,18 +100,26 @@ class _MainScreenState extends State<MainScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Icon(Icons.location_on, color: Colors.grey),
+                        SizedBox(
+                          width: 10,
+                        ),
                         Text(
-                          _prstateEditingController.text,
+                          _prlocalEditingController.text,
                           style: TextStyle(
                             fontSize: 15.0,
                             color: Colors.grey,
                           ),
                         ),
                         SizedBox(
+                          width: 50,
+                        ),
+                        Icon(Icons.flag_sharp, color: Colors.grey),
+                        SizedBox(
                           width: 10,
                         ),
                         Text(
-                          _prlocalEditingController.text,
+                          _prstateEditingController.text,
                           style: TextStyle(
                             fontSize: 15.0,
                             color: Colors.grey,
@@ -247,37 +258,63 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void checkIn() {
-    String state = _prstateEditingController.text;
-    String locality = _prlocalEditingController.text;
+  void checkIn() async {
+    // Retrieve the last check-in timestamp for the employee
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int lastCheckInTime = prefs.getInt(widget.employee.id.toString()) ?? 0;
 
-    http.post(
-        Uri.parse("${MyConfig().SERVER}/checkin_app/php/insert_checkin.php"),
-        body: {
-          "employeeid": widget.employee.id.toString(),
-          "latitude": prlat,
-          "longitude": prlong,
-          "state": state,
-          "locality": locality,
-        }).then((response) {
-      print(response.body);
-      if (response.statusCode == 200) {
-        var jsondata = jsonDecode(response.body);
-        print(jsondata);
-        if (jsondata['status'] == 'success') {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Check In Success")));
+    // Get the current timestamp
+    int currentTime = DateTime.now().millisecondsSinceEpoch;
+
+    // Calculate the time difference in milliseconds
+    int timeDifference = currentTime - lastCheckInTime;
+    int twoHoursInMillis = 2 * 60 * 60 * 1000; // Two hours in milliseconds
+
+    if (timeDifference >= twoHoursInMillis) {
+      // Sufficient time has passed, allow check-in
+      String state = _prstateEditingController.text;
+      String locality = _prlocalEditingController.text;
+
+      http.post(
+          Uri.parse("${MyConfig().SERVER}/checkin_app/php/insert_checkin.php"),
+          body: {
+            "employeeid": widget.employee.id.toString(),
+            "latitude": prlat,
+            "longitude": prlong,
+            "state": state,
+            "locality": locality,
+          }).then((response) {
+        print(response.body);
+        if (response.statusCode == 200) {
+          var jsondata = jsonDecode(response.body);
+          print(jsondata);
+          if (jsondata['status'] == 'success') {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Check In Success")));
+            Navigator.pop(context);
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (content) => WelcomeScreen()));
+          } else {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text("Check In Failed")));
+            Navigator.pop(context);
+          }
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Check In Failed")));
+          Navigator.pop(context);
         }
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Check In Failed")));
-        Navigator.pop(context);
-      }
-    });
+        // Update the last check-in timestamp for the employee
+        prefs.setInt(widget.employee.id.toString(), currentTime);
+      });
+    } else {
+      // Restriction violation, show an error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("You can only check in once every two hours."),
+        ),
+      );
+    }
   }
 
   void _determinePosition() async {
