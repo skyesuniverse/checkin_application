@@ -1,20 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:checkin_application/models/employee.dart';
+import 'package:checkin_application/models/checkin.dart';
 import 'package:checkin_application/myconfig.dart';
 import 'package:checkin_application/screens/welcomescreen.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
   final Employee employee;
+  final CheckIn checkIn;
 
-  const MainScreen({super.key, required this.employee});
+  const MainScreen({super.key, required this.employee, required this.checkIn});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -22,6 +22,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late double screenHeight, screenWidth, cardwitdh;
+  // List<CheckIn> catchList = <CheckIn>[];
 
   final TextEditingController _prstateEditingController =
       TextEditingController();
@@ -39,6 +40,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _determinePosition();
+    // loademployeeCheckInList();
   }
 
   @override
@@ -46,9 +48,34 @@ class _MainScreenState extends State<MainScreen> {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      // appBar: AppBar(),
+      // appBar: AppBar(actions: [],
+      //     backgroundColor: Colors.transparent,
+      //     elevation: 0.0,
+      //     automaticallyImplyLeading: false), // Disable back button
+      appBar: AppBar(
+        title: const Text("Employee Check-In"),
+        actions: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  _gotologout();
+                },
+                child: const Icon(
+                  Icons.logout_rounded,
+                  size: 26.0,
+                ),
+              )),
+        ],
+        backgroundColor: Colors.lightBlue[100],
+        elevation: 0.0,
+        automaticallyImplyLeading: false,
+        // toolbarHeight: 45.0, // Disable back button
+      ),
       body: (Center(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // Container(
             //   margin: EdgeInsets.all(4),
@@ -57,10 +84,12 @@ class _MainScreenState extends State<MainScreen> {
             //     "assets/images/profile.png",
             //   ),
             // ),
+
             Container(
               child: Column(
                 children: [
-                  SizedBox(height: 48.0),
+                  // SizedBox(height: 20.0),
+
                   CircleAvatar(
                     radius: 40.0,
                     backgroundImage: AssetImage('assets/images/profile.png'),
@@ -73,29 +102,33 @@ class _MainScreenState extends State<MainScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  SizedBox(height: 10.0),
                   Text(
                     widget.employee.email.toString(),
                     style: TextStyle(
                       fontSize: 15.0,
-                      color: Colors.grey,
+                      color: Colors.black54,
                     ),
                   ),
+                  SizedBox(height: 5.0),
                   Text(
                     widget.employee.phone.toString(),
                     style: TextStyle(
                       fontSize: 15.0,
-                      color: Colors.grey,
+                      color: Colors.black54,
                     ),
                   ),
+                  SizedBox(height: 5.0),
                   Text(
                     //"RM ${double.parse(catchList[index].catchPrice.toString()).toStringAsFixed(2)}",
 
                     "Department: ${widget.employee.dept.toString()}",
                     style: TextStyle(
                       fontSize: 15.0,
-                      color: Colors.grey,
+                      color: Colors.black54,
                     ),
                   ),
+                  SizedBox(height: 35.0),
                   Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -131,22 +164,24 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: ScrollPhysics(),
-                itemCount:
-                    6, // Replace with the actual number of attendance entries
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    leading: Icon(Icons.calendar_today),
-                    title: Text('Date ${index + 1}'),
-                    subtitle: Text(
-                        'Present'), // Replace with the actual attendance status
-                  );
-                },
-              ),
-            ),
+
+            // Expanded(
+            //   child: ListView.builder(
+            //     shrinkWrap: true,
+            //     physics: ScrollPhysics(),
+            //     itemCount:
+            //         8, // Replace with the actual number of attendance entries
+            //     itemBuilder: (BuildContext context, int index) {
+            //       return ListTile(
+            //         leading: Icon(Icons.calendar_today),
+            //         title: Text('Date ${index + 1}'),
+            //         subtitle: Text(
+            //             'Present'), // Replace with the actual attendance status
+            //       );
+            //     },
+            //   ),
+            // ),
+
             // Container(
 
             //   decoration: BoxDecoration(
@@ -193,7 +228,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.only(
-                        top: 8, bottom: 8, left: 15, right: 15),
+                        top: 8, bottom: 8, left: 32, right: 32),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadiusDirectional.circular(25.0),
                       // side: BorderSide(color: Colors.black),
@@ -201,17 +236,17 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
               ),
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(
-                        0, 2), // Offset to control the position of the shadow
-                  ),
-                ],
-              ),
+              // decoration: BoxDecoration(
+              //   boxShadow: [
+              //     BoxShadow(
+              //       color: Colors.black.withOpacity(0.2),
+              //       spreadRadius: 2,
+              //       blurRadius: 5,
+              //       offset: Offset(
+              //           0, 2), // Offset to control the position of the shadow
+              //     ),
+              //   ],
+              // ),
             ),
           ],
         ),
@@ -238,7 +273,6 @@ class _MainScreenState extends State<MainScreen> {
                 style: TextStyle(),
               ),
               onPressed: () {
-                Navigator.of(context).pop();
                 checkIn();
                 //registerUser();
               },
@@ -258,63 +292,125 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  // void checkIn() async {
+  //   // Retrieve the last check-in timestamp for the employee
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   // int lastCheckInTime =
+  //   //     prefs.getInt(widget.checkIn.checkinTime.toString()) ?? 0;
+  //   // int lastCheckInTime = 600000000;
+  //   // Retrieve the last check-in timestamp for the employee
+  //   int lastCheckInTime = prefs.getInt(widget.employee.id.toString()) ?? 0;
+  //   print(lastCheckInTime);
+
+  //   // Get the current timestamp
+  //   int currentTime = DateTime.now().millisecondsSinceEpoch;
+
+  //   // Calculate the time difference in milliseconds
+  //   int timeDifference = currentTime - lastCheckInTime;
+  //   int twoHoursInMillis = 2 * 60 * 60 * 1000; // Two hours in milliseconds
+
+  //   if (timeDifference >= twoHoursInMillis) {
+  //     // Sufficient time has passed, allow check-in
+  //     String state = _prstateEditingController.text;
+  //     String locality = _prlocalEditingController.text;
+
+  //     http.post(
+  //         Uri.parse("${MyConfig().SERVER}/checkin_app/php/insert_checkin.php"),
+  //         body: {
+  //           "employeeid": widget.employee.id.toString(),
+  //           "latitude": prlat,
+  //           "longitude": prlong,
+  //           "state": state,
+  //           "locality": locality,
+  //         }).then((response) {
+  //       print(response.body);
+  //       if (response.statusCode == 200) {
+  //         var jsondata = jsonDecode(response.body);
+  //         print(jsondata);
+  //         if (jsondata['status'] == 'success') {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //               const SnackBar(content: Text("Check In Success")));
+  //           Navigator.pop(context);
+  //         } else {
+  //           ScaffoldMessenger.of(context)
+  //               .showSnackBar(const SnackBar(content: Text("Check In Failed")));
+  //           Navigator.pop(context);
+  //         }
+  //       } else {
+  //         ScaffoldMessenger.of(context)
+  //             .showSnackBar(const SnackBar(content: Text("Check In Failed")));
+  //         Navigator.pop(context);
+  //       }
+  //       // Update the last check-in timestamp for the employee
+  //       prefs.setInt(widget.employee.id.toString(), currentTime);
+  //     });
+  //   } else {
+  //     // Restriction violation, show an error message
+  //     // ScaffoldMessenger.of(context).showSnackBar(
+  //     //   const SnackBar(
+  //     //     content: Text("You can only check in once every two hours."),
+  //     //   ),
+  //     // );
+  //     showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: Text("Check-In Failed"),
+  //           content: Text("You can only check in once every two hours."),
+  //           actions: [
+  //             TextButton(
+  //               child: Text("OK"),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       },
+  //     );
+  //   }
+  //   // Navigator.pop(context);
+  //   // Navigator.pushReplacement(
+  //   //     context, MaterialPageRoute(builder: (content) => WelcomeScreen()));
+  // }
+
   void checkIn() async {
-    // Retrieve the last check-in timestamp for the employee
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int lastCheckInTime = prefs.getInt(widget.employee.id.toString()) ?? 0;
+    String state = _prstateEditingController.text;
+    String locality = _prlocalEditingController.text;
 
-    // Get the current timestamp
-    int currentTime = DateTime.now().millisecondsSinceEpoch;
-
-    // Calculate the time difference in milliseconds
-    int timeDifference = currentTime - lastCheckInTime;
-    int twoHoursInMillis = 2 * 60 * 60 * 1000; // Two hours in milliseconds
-
-    if (timeDifference >= twoHoursInMillis) {
-      // Sufficient time has passed, allow check-in
-      String state = _prstateEditingController.text;
-      String locality = _prlocalEditingController.text;
-
-      http.post(
-          Uri.parse("${MyConfig().SERVER}/checkin_app/php/insert_checkin.php"),
-          body: {
-            "employeeid": widget.employee.id.toString(),
-            "latitude": prlat,
-            "longitude": prlong,
-            "state": state,
-            "locality": locality,
-          }).then((response) {
-        print(response.body);
-        if (response.statusCode == 200) {
-          var jsondata = jsonDecode(response.body);
-          print(jsondata);
-          if (jsondata['status'] == 'success') {
-            ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Check In Success")));
-            Navigator.pop(context);
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (content) => WelcomeScreen()));
-          } else {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text("Check In Failed")));
-            Navigator.pop(context);
-          }
+    http.post(
+        Uri.parse("${MyConfig().SERVER}/checkin_app/php/insert_checkin.php"),
+        body: {
+          "employeeid": widget.employee.id.toString(),
+          "latitude": prlat,
+          "longitude": prlong,
+          "state": state,
+          "locality": locality,
+        }).then((response) {
+      print(response.body);
+      if (response.statusCode == 200) {
+        var jsondata = jsonDecode(response.body);
+        print(jsondata);
+        if (jsondata['status'] == 'success') {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Check In Success")));
+          Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Check In Failed")));
           Navigator.pop(context);
         }
-        // Update the last check-in timestamp for the employee
-        prefs.setInt(widget.employee.id.toString(), currentTime);
-      });
-    } else {
-      // Restriction violation, show an error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("You can only check in once every two hours."),
-        ),
-      );
-    }
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Check In Failed")));
+        Navigator.pop(context);
+      }
+      // Update the last check-in timestamp for the employee
+    });
+
+    // Navigator.pop(context);
+    // Navigator.pushReplacement(
+    //     context, MaterialPageRoute(builder: (content) => WelcomeScreen()));
   }
 
   void _determinePosition() async {
@@ -365,5 +461,42 @@ class _MainScreenState extends State<MainScreen> {
       prlong = _currentPosition.longitude.toString();
     }
     setState(() {});
+  }
+
+  Future<void> _gotologout() async {
+    print(widget.employee.name);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: Text("Logging out"),
+          content: Text("Are your sure?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Yes"),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setString('email', '');
+                await prefs.setString('pass', '');
+                print("LOGOUT");
+                // ignore: use_build_context_synchronously
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const WelcomeScreen()));
+              },
+            ),
+            TextButton(
+              child: Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

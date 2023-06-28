@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:checkin_application/models/checkin.dart';
 import 'package:checkin_application/models/employee.dart';
 import 'package:checkin_application/myconfig.dart';
 import 'package:checkin_application/screens/mainscreen.dart';
@@ -204,8 +205,10 @@ class _LoginScreenState extends State<LoginScreen> {
           var jsondata = jsonDecode(response.body);
           if (jsondata['status'] == 'success') {
             Employee employee = Employee.fromJson(jsondata['data']);
+            CheckIn checkin = CheckIn.fromJson(jsondata['data']);
             print(employee.name);
             print(employee.email);
+            print(checkin.checkinTime);
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text("Login Success")));
             Navigator.pushReplacement(
@@ -213,6 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 MaterialPageRoute(
                     builder: (content) => MainScreen(
                           employee: employee,
+                          checkIn: checkin,
                         )));
           } else {
             ScaffoldMessenger.of(context)
