@@ -274,6 +274,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               onPressed: () {
                 checkIn();
+
                 //registerUser();
               },
             ),
@@ -396,13 +397,27 @@ class _MainScreenState extends State<MainScreen> {
               .showSnackBar(const SnackBar(content: Text("Check In Success")));
           Navigator.pop(context);
         } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Check In Failed")));
-          Navigator.pop(context);
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text("Check-In Failed"),
+                content: Text("You can only check in once every two hours."),
+                actions: [
+                  TextButton(
+                    child: Text("OK"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
         }
       } else {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Check In Failed")));
+            .showSnackBar(const SnackBar(content: Text("Check In Failed.")));
         Navigator.pop(context);
       }
       // Update the last check-in timestamp for the employee
