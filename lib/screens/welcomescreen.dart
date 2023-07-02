@@ -27,7 +27,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(
-                height: 190,
+                height: 160,
               ),
               const Text(
                 "Welcome !",

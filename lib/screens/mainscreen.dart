@@ -408,6 +408,7 @@ class _MainScreenState extends State<MainScreen> {
                     child: Text("OK"),
                     onPressed: () {
                       Navigator.of(context).pop();
+                      Navigator.of(context).pop();
                     },
                   ),
                 ],
@@ -420,12 +421,8 @@ class _MainScreenState extends State<MainScreen> {
             .showSnackBar(const SnackBar(content: Text("Check In Failed.")));
         Navigator.pop(context);
       }
-      // Update the last check-in timestamp for the employee
+      
     });
-
-    // Navigator.pop(context);
-    // Navigator.pushReplacement(
-    //     context, MaterialPageRoute(builder: (content) => WelcomeScreen()));
   }
 
   void _determinePosition() async {
