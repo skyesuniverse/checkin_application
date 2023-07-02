@@ -55,8 +55,13 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text("Employee Check-In"),
         actions: <Widget>[
+          IconButton(
+              onPressed: () {
+                _determinePosition();
+              },
+              icon: const Icon(Icons.refresh)),
           Padding(
-              padding: EdgeInsets.only(right: 20.0),
+              padding: EdgeInsets.only(right: 15.0),
               child: GestureDetector(
                 onTap: () {
                   _gotologout();
@@ -421,7 +426,6 @@ class _MainScreenState extends State<MainScreen> {
             .showSnackBar(const SnackBar(content: Text("Check In Failed.")));
         Navigator.pop(context);
       }
-      
     });
   }
 
