@@ -134,36 +134,42 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   SizedBox(height: 35.0),
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.location_on, color: Colors.grey),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          _prlocalEditingController.text,
-                          style: TextStyle(
-                            fontSize: 15.0,
-                            color: Colors.grey,
+                  Container(
+                    alignment: Alignment.center,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(width: 7),
+                          Icon(Icons.location_on, color: Colors.grey),
+                          SizedBox(width: 7),
+                          Flexible(
+                            child: Text(
+                              _prlocalEditingController.text,
+                              style: TextStyle(
+                                fontSize: 15.0,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 50,
-                        ),
-                        Icon(Icons.flag_sharp, color: Colors.grey),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          _prstateEditingController.text,
-                          style: TextStyle(
-                            fontSize: 15.0,
-                            color: Colors.grey,
+                          SizedBox(
+                            width: 25,
                           ),
-                        ),
-                      ],
+                          Icon(Icons.flag_sharp, color: Colors.grey),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Flexible(
+                            child: Text(
+                              _prstateEditingController.text,
+                              style: TextStyle(
+                                fontSize: 15.0,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 ],
